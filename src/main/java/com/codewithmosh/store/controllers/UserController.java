@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithmosh.store.dtos.UserDto;
+import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 
 import lombok.AllArgsConstructor;
@@ -20,6 +21,7 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/users")
 public class UserController {
     private final UserRepository userRepository;
+    private final UserMapper userMapper;
 
     @GetMapping()
     public Iterable<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
@@ -27,7 +29,7 @@ public class UserController {
             return userRepository
                 .findAll()
                 .stream()
-                .map(user -> new UserDto(user.getId(), user.getName(), user.getEmail()))
+                .map(userMapper::toDto)
                 .toList();
         }
 
@@ -38,7 +40,7 @@ public class UserController {
         return userRepository
             .findAll(Sort.by(sortBy))
             .stream()
-            .map(user -> new UserDto(user.getId(), user.getName(), user.getEmail()))
+            .map(userMapper::toDto)
             .toList();
     }
 
@@ -51,6 +53,6 @@ public class UserController {
         if(user == null) {
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(new UserDto(user.getId(), user.getName(), user.getEmail()));
+        return ResponseEntity.ok(userMapper.toDto(user));
     }
 }
