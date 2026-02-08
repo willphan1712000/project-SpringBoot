@@ -8,6 +8,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.hibernate.annotations.LazyToOne;
+import org.hibernate.annotations.LazyToOneOption;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -44,7 +47,7 @@ public class User {
         address.setUser(null);
     }
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private Profile profile;
 
     @ManyToMany

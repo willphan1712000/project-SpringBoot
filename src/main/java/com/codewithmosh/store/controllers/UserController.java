@@ -1,13 +1,16 @@
 package com.codewithmosh.store.controllers;
 
+import java.util.Set;
+
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithmosh.store.dtos.UserDto;
-import com.codewithmosh.store.entities.User;
 import com.codewithmosh.store.repositories.UserRepository;
 
 import lombok.AllArgsConstructor;
@@ -19,9 +22,21 @@ public class UserController {
     private final UserRepository userRepository;
 
     @GetMapping()
-    public Iterable<UserDto> getAllUsers() {
+    public Iterable<UserDto> getAllUsers(@RequestParam(required = false, defaultValue = "", name = "sort") String sortBy) {
+        if(sortBy.isEmpty()) {
+            return userRepository
+                .findAll()
+                .stream()
+                .map(user -> new UserDto(user.getId(), user.getName(), user.getEmail()))
+                .toList();
+        }
+
+        if(!Set.of("name", "email").contains(sortBy)) {
+            sortBy = "name";
+        }
+        
         return userRepository
-            .findAll()
+            .findAll(Sort.by(sortBy))
             .stream()
             .map(user -> new UserDto(user.getId(), user.getName(), user.getEmail()))
             .toList();
