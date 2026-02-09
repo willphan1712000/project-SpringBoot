@@ -16,7 +16,7 @@ public class UserDto {
         this.email = email;
     }
 
-    @JsonProperty("user_id")
+    @JsonProperty("id")
     private Long id;
     private String name;
     private String email;
