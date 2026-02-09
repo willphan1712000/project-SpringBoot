@@ -1,6 +1,7 @@
 package com.codewithmosh.store.mappers;
 
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 
 import com.codewithmosh.store.dtos.RegisterUserDto;
@@ -11,6 +12,17 @@ import com.codewithmosh.store.entities.User;
 @Mapper(componentModel = "spring")
 public interface UserMapper {
     UserDto toDto(User user);
+
+    @Mapping( target = "id", ignore = true)
+    @Mapping( target = "addresses", ignore = true)
+    @Mapping( target = "profile", ignore = true)
+    @Mapping( target = "favoriteProducts", ignore = true)
     User toEntity(RegisterUserDto request);
+    
+    @Mapping( target = "addresses", ignore = true)
+    @Mapping( target = "profile", ignore = true)
+    @Mapping( target = "favoriteProducts", ignore = true)
+    @Mapping( target = "id", ignore =  true)
+    @Mapping( target = "password", ignore =  true)
     void update(UpdateUserDto request, @MappingTarget User user);
 }
