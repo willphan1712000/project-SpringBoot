@@ -1,5 +1,7 @@
 package com.codewithmosh.store.dtos;
 
+import com.codewithmosh.store.validation.LowerCase;
+
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -13,6 +15,7 @@ public class RegisterUserDto {
     
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
+    @LowerCase
     private String email;
 
     @NotBlank(message = "Password is required")
