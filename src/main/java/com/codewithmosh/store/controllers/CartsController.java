@@ -6,13 +6,14 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.codewithmosh.store.dtos.CartDto;
+import com.codewithmosh.store.dtos.cart.CartDto;
 import com.codewithmosh.store.dtos.cartItems.AddCartItemDto;
 import com.codewithmosh.store.dtos.cartItems.CartItemDto;
 import com.codewithmosh.store.entities.Cart;
@@ -78,5 +79,31 @@ public class CartsController {
         );
 
         return new ResponseEntity<>(cartItemDto, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/{cartId}")
+    public ResponseEntity<CartDto> getCart(@PathVariable UUID cartId) {
+        var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
+        if(cart == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        var cartDto = cartMapper.toDto(cart);
+
+        cartDto.getItems().forEach(item -> {
+            item.setTotalPrice(
+                item.getProduct().getPrice().multiply(
+                    BigDecimal.valueOf(
+                        item.getQuantity()
+                    )
+                )
+            );
+
+            cartDto.setTotalPrice(
+                cartDto.getTotalPrice().add(item.getTotalPrice())
+            );
+        });
+
+        return ResponseEntity.ok(cartDto);
     }
 }
