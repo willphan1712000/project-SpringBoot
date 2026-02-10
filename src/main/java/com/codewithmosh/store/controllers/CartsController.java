@@ -114,7 +114,7 @@ public class CartsController {
     @PutMapping("/{cartId}/items/{productId}")
     public ResponseEntity<CartItemDto> updateCart(@PathVariable UUID cartId, @PathVariable Long productId, @Valid @RequestBody UpdateCartItemDto request ) {
         // Check if cart exists
-        var cart = cartsRepository.findById(Objects.requireNonNull(cartId));
+        var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
         if(cart == null) {
             return ResponseEntity.notFound().build();
         }
@@ -146,7 +146,7 @@ public class CartsController {
     @DeleteMapping("/{cartId}/items/{productId}")
     public ResponseEntity<Void> removeCartItem(@PathVariable UUID cartId, @PathVariable Long productId) {
         // Check if cart exists
-        var cart = cartsRepository.findById(Objects.requireNonNull(cartId));
+        var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
         if(cart == null) {
             return ResponseEntity.notFound().build();
         }
@@ -158,6 +158,19 @@ public class CartsController {
         }
 
         cartItemsRepository.delete(cartItem);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{cartId}/items")
+    public ResponseEntity<Void> removeCart(@PathVariable UUID cartId) {
+        // Check if cart exists
+        var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
+        if(cart == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        cartsRepository.delete(cart);
 
         return ResponseEntity.noContent().build();
     }
