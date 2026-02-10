@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.codewithmosh.store.dtos.cart.CartDto;
 import com.codewithmosh.store.dtos.cartItems.AddCartItemDto;
 import com.codewithmosh.store.dtos.cartItems.CartItemDto;
+import com.codewithmosh.store.dtos.cartItems.UpdateCartItemDto;
 import com.codewithmosh.store.entities.Cart;
 import com.codewithmosh.store.mappers.CartItemMapper;
 import com.codewithmosh.store.mappers.CartMapper;
@@ -23,6 +25,7 @@ import com.codewithmosh.store.repositories.CartItemsRepository;
 import com.codewithmosh.store.repositories.CartsRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
 
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
@@ -105,5 +108,37 @@ public class CartsController {
         });
 
         return ResponseEntity.ok(cartDto);
+    }
+
+    @PutMapping("/{cartId}/items/{productId}")
+    public ResponseEntity<CartItemDto> updateCart(@PathVariable UUID cartId, @PathVariable Long productId, @Valid @RequestBody UpdateCartItemDto request ) {
+        // Check if cart exists
+        var cart = cartsRepository.findById(Objects.requireNonNull(cartId));
+        if(cart == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Check if cart item exists
+        var cartItem = cartItemsRepository.findByProductId(productId);
+        if(cartItem == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        cartItem.setQuantity(
+            request.getQuantity()
+        );
+
+        cartItemsRepository.save(cartItem);
+
+        var cartItemDto = cartItemMapper.toDto(cartItem);
+        cartItemDto.setTotalPrice(
+            cartItemDto.getProduct().getPrice().multiply(
+                BigDecimal.valueOf(
+                    cartItemDto.getQuantity()
+                )
+            )
+        );
+
+        return ResponseEntity.ok(cartItemDto);
     }
 }
