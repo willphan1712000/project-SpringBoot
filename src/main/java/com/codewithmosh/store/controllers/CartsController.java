@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -140,5 +141,24 @@ public class CartsController {
         );
 
         return ResponseEntity.ok(cartItemDto);
+    }
+
+    @DeleteMapping("/{cartId}/items/{productId}")
+    public ResponseEntity<Void> removeCartItem(@PathVariable UUID cartId, @PathVariable Long productId) {
+        // Check if cart exists
+        var cart = cartsRepository.findById(Objects.requireNonNull(cartId));
+        if(cart == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Check if cart item exists
+        var cartItem = cartItemsRepository.findByProductId(productId);
+        if(cartItem == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        cartItemsRepository.delete(cartItem);
+
+        return ResponseEntity.noContent().build();
     }
 }
