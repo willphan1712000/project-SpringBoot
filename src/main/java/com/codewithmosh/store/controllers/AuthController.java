@@ -1,5 +1,7 @@
 package com.codewithmosh.store.controllers;
 
+import java.util.Map;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +38,7 @@ public class AuthController {
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Void> badCredentialsExceptionHandler() {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+    public ResponseEntity<Map<String,String>> badCredentialsExceptionHandler(Exception e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", e.getMessage()));
     }
 }
