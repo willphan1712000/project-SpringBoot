@@ -34,11 +34,18 @@ public class Cart {
     @Column(name = "date_created", updatable = false, insertable = false)
     private LocalDateTime dateCreated;
 
-    @OneToMany(mappedBy = "cart", cascade = { CascadeType.MERGE, CascadeType.REMOVE } , fetch = FetchType.EAGER )
+    @OneToMany(mappedBy = "cart", cascade = { CascadeType.MERGE, CascadeType.REMOVE } , orphanRemoval = true, fetch = FetchType.EAGER )
     private Set<CartItem> cartItems;
 
     public void removeItem(CartItem item) {
+        if(item == null) return;
+
         cartItems.remove(item);
+        item.setCart(null);
+    }
+
+    public void clear() {
+        cartItems.clear();
     }
 
     public BigDecimal getTotalPrice() {

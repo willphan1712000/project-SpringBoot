@@ -1,5 +1,6 @@
 package com.codewithmosh.store.controllers;
 
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -37,6 +38,10 @@ public class CartsController {
     private final CartMapper cartMapper;
     private final CartItemMapper cartItemMapper;
 
+    /**
+     * Creating a Cart
+     * @return
+     */
     @PostMapping
     public ResponseEntity<CartDto> createCart() {
         var cart = new Cart();
@@ -45,6 +50,12 @@ public class CartsController {
         return new ResponseEntity<>(cartDto, HttpStatus.CREATED);
     }
 
+    /**
+     * Adding a Product to the Cart
+     * @param cartId
+     * @param request
+     * @return
+     */
     @PostMapping("/{cartId}/items")
     public ResponseEntity<CartItemDto> addProductToCart(@PathVariable UUID cartId, @Valid @RequestBody AddCartItemDto request) {
         // Check if cart exists
@@ -67,6 +78,11 @@ public class CartsController {
         return new ResponseEntity<>(cartItemMapper.toDto(cartItem), HttpStatus.CREATED);
     }
 
+    /**
+     * Getting a Cart
+     * @param cartId
+     * @return
+     */
     @GetMapping("/{cartId}")
     public ResponseEntity<CartDto> getCart(@PathVariable UUID cartId) {
         var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
@@ -77,6 +93,13 @@ public class CartsController {
         return ResponseEntity.ok(cartMapper.toDto(cart));
     }
 
+    /**
+     * Updating a Cart Item
+     * @param cartId
+     * @param productId
+     * @param request
+     * @return
+     */
     @PutMapping("/{cartId}/items/{productId}")
     public ResponseEntity<CartItemDto> updateCart(@PathVariable UUID cartId, @PathVariable Long productId, @Valid @RequestBody UpdateCartItemDto request ) {
         // Check if cart exists
@@ -95,18 +118,28 @@ public class CartsController {
         return ResponseEntity.ok(cartItemMapper.toDto(cartItem));
     }
 
+    /**
+     * Removing a Product from the Cart
+     * @param cartId
+     * @param productId
+     * @return
+     */
     @DeleteMapping("/{cartId}/items/{productId}")
-    public ResponseEntity<Void> removeCartItem(@PathVariable UUID cartId, @PathVariable Long productId) {
+    public ResponseEntity<?> removeCartItem(@PathVariable UUID cartId, @PathVariable Long productId) {
         // Check if cart exists
         var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
         if(cart == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("error", "cart not found")
+            );
         }
 
         // Check if cart item exists
         var cartItem = cart.findCartItem(productId);
         if(cartItem == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("error", "cart item not found")
+            );
         }
 
         cart.removeItem(cartItem);
@@ -115,15 +148,23 @@ public class CartsController {
         return ResponseEntity.noContent().build();
     }
 
+    /**
+     * Clearing a cart -> remove every product in a cart
+     * @param cartId
+     * @return
+    */
     @DeleteMapping("/{cartId}/items")
-    public ResponseEntity<Void> removeCart(@PathVariable UUID cartId) {
+    public ResponseEntity<?> removeCart(@PathVariable UUID cartId) {
         // Check if cart exists
         var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
         if(cart == null) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("error", "cart not found")
+            );
         }
 
-        cartsRepository.delete(cart);
+        cart.clear();
+        cartsRepository.save(cart);
 
         return ResponseEntity.noContent().build();
     }
