@@ -1,6 +1,5 @@
 package com.codewithmosh.store.controllers;
 
-import java.math.BigDecimal;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -20,7 +19,6 @@ import com.codewithmosh.store.dtos.cartItems.AddCartItemDto;
 import com.codewithmosh.store.dtos.cartItems.CartItemDto;
 import com.codewithmosh.store.dtos.cartItems.UpdateCartItemDto;
 import com.codewithmosh.store.entities.Cart;
-import com.codewithmosh.store.entities.CartItem;
 import com.codewithmosh.store.mappers.CartItemMapper;
 import com.codewithmosh.store.mappers.CartMapper;
 import com.codewithmosh.store.repositories.CartsRepository;
@@ -62,21 +60,8 @@ public class CartsController {
             return ResponseEntity.badRequest().build(); // this comes from the body not from the request url
         }
 
-        // Check if there is existing product in cart item
-        var cartItem = cart.getCartItems().stream().filter(
-            item -> item.getProduct().getId().equals(productId)
-        ).findFirst().orElse(null);
+        var cartItem = cart.addItem(product);
 
-        if(cartItem != null) {
-            cartItem.setQuantity(cartItem.getQuantity() + 1); // increase quantity of an existing product in cart item
-        } else {
-            cartItem = new CartItem();
-            cartItem.setQuantity(1);
-            cartItem.setCart(cart);
-            cartItem.setProduct(product);
-        }
-
-        cart.addItem(cartItem);
         cartsRepository.save(cart);
 
         return new ResponseEntity<>(cartItemMapper.toDto(cartItem), HttpStatus.CREATED);
@@ -101,19 +86,13 @@ public class CartsController {
         }
 
         // Check if cart item exists
-        var cartItem = cart.getCartItems().stream().filter(
-            item -> item.getProduct().getId().equals(productId)
-        ).findFirst().orElse(null);
+        var cartItem = cart.findCartItem(productId);
 
-        cartItem.setQuantity(
-            request.getQuantity()
-        );
+        cartItem.setQuantity(request.getQuantity());
 
         cartsRepository.save(cart);
 
-        var cartItemDto = cartItemMapper.toDto(cartItem);
-
-        return ResponseEntity.ok(cartItemDto);
+        return ResponseEntity.ok(cartItemMapper.toDto(cartItem));
     }
 
     @DeleteMapping("/{cartId}/items/{productId}")
@@ -125,9 +104,7 @@ public class CartsController {
         }
 
         // Check if cart item exists
-        var cartItem = cart.getCartItems().stream().filter(
-            item -> item.getProduct().getId().equals(productId)
-        ).findFirst().orElse(null);
+        var cartItem = cart.findCartItem(productId);
         if(cartItem == null) {
             return ResponseEntity.notFound().build();
         }

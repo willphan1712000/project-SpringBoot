@@ -37,10 +37,6 @@ public class Cart {
     @OneToMany(mappedBy = "cart", cascade = { CascadeType.MERGE, CascadeType.REMOVE } , fetch = FetchType.EAGER )
     private Set<CartItem> cartItems;
 
-    public void addItem(CartItem item) {
-        cartItems.add(item);
-    }
-
     public void removeItem(CartItem item) {
         cartItems.remove(item);
     }
@@ -52,5 +48,27 @@ public class Cart {
         return cartItems.stream()
                 .map(CartItem::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public CartItem findCartItem(Long productId) {
+        return cartItems.stream().filter(
+            item -> item.getProduct().getId().equals(productId)
+        ).findFirst().orElse(null);
+    }
+
+    public CartItem addItem(Product product) {
+        var cartItem = findCartItem(product.getId());
+
+        if(cartItem != null) {
+            cartItem.setQuantity(cartItem.getQuantity() + 1); // increase quantity of an existing product in cart item
+        } else {
+            cartItem = new CartItem();
+            cartItem.setQuantity(1);
+            cartItem.setCart(this);
+            cartItem.setProduct(product);
+            cartItems.add(cartItem);
+        }
+
+        return cartItem;
     }
 }
