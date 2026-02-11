@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.codewithmosh.store.dtos.JwtResponse;
 import com.codewithmosh.store.dtos.auth.SigninDto;
+import com.codewithmosh.store.services.JwtService;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,14 +22,17 @@ import lombok.AllArgsConstructor;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
+    private final JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@Valid @RequestBody SigninDto request) {
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody SigninDto request) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
-        return ResponseEntity.ok().build();
+        var token = jwtService.generate(request.getEmail());
+
+        return ResponseEntity.ok(new JwtResponse(token));
     }
 
     @ExceptionHandler(Exception.class)
