@@ -32,12 +32,11 @@ public class AuthController {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
-
         var token = jwtService.generate(request.getEmail());
-
+        
         return ResponseEntity.ok(new JwtResponse(token));
     }
-
+    
     @PostMapping("/validate")
     public boolean validate(@RequestHeader("Authorization") String authHeader) {
         var token = authHeader.replace("Bearer ", "");
