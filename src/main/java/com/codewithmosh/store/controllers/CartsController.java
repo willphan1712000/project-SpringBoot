@@ -3,6 +3,7 @@ package com.codewithmosh.store.controllers;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.context.annotation.Description;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -22,25 +23,26 @@ import com.codewithmosh.store.dtos.cartItems.UpdateCartItemDto;
 import com.codewithmosh.store.exceptions.CartItemNotFoundException;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.exceptions.ProductNotFoundException;
-import com.codewithmosh.store.repositories.CartsRepository;
 import com.codewithmosh.store.services.CartService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
 @AllArgsConstructor
 @RestController
 @RequestMapping("/carts")
+@Tag(name = "Carts")
 public class CartsController {
-    private final CartsRepository cartsRepository;
-
     private final CartService cartService;
 
     /**
      * Creating a Cart
      * @return
-     */
-    @PostMapping
+    */
+   @PostMapping
     public ResponseEntity<CartDto> createCart() {
         var cartDto = cartService.createCart();
         return new ResponseEntity<>(cartDto, HttpStatus.CREATED);
@@ -53,7 +55,8 @@ public class CartsController {
      * @return
      */
     @PostMapping("/{cartId}/items")
-    public ResponseEntity<CartItemDto> addProductToCart(@PathVariable UUID cartId, @Valid @RequestBody AddCartItemDto request) {
+    @Operation(summary = "Add a product to a cart")
+    public ResponseEntity<CartItemDto> addProductToCart(@Parameter(deprecated = true, description = "cart id") @PathVariable UUID cartId, @Valid @RequestBody AddCartItemDto request) {
         var cartItemDto = cartService.addProductToCart(cartId, request.getProductId());
         return ResponseEntity.status(HttpStatus.CREATED).body(cartItemDto);
     }
