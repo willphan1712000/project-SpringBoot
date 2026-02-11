@@ -1,11 +1,14 @@
 package com.codewithmosh.store.entities;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,6 +34,23 @@ public class Cart {
     @Column(name = "date_created", updatable = false, insertable = false)
     private LocalDateTime dateCreated;
 
-    @OneToMany(mappedBy = "cart")
-    private List<CartItem> cartItems;
+    @OneToMany(mappedBy = "cart", cascade = { CascadeType.MERGE, CascadeType.REMOVE } , fetch = FetchType.EAGER )
+    private Set<CartItem> cartItems;
+
+    public void addItem(CartItem item) {
+        cartItems.add(item);
+    }
+
+    public void removeItem(CartItem item) {
+        cartItems.remove(item);
+    }
+
+    public BigDecimal getTotalPrice() {
+        if (cartItems == null) {
+            return BigDecimal.ZERO;
+        }
+        return cartItems.stream()
+                .map(CartItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
 }

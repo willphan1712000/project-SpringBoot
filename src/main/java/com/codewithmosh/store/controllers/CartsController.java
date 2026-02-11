@@ -20,9 +20,9 @@ import com.codewithmosh.store.dtos.cartItems.AddCartItemDto;
 import com.codewithmosh.store.dtos.cartItems.CartItemDto;
 import com.codewithmosh.store.dtos.cartItems.UpdateCartItemDto;
 import com.codewithmosh.store.entities.Cart;
+import com.codewithmosh.store.entities.CartItem;
 import com.codewithmosh.store.mappers.CartItemMapper;
 import com.codewithmosh.store.mappers.CartMapper;
-import com.codewithmosh.store.repositories.CartItemsRepository;
 import com.codewithmosh.store.repositories.CartsRepository;
 import com.codewithmosh.store.repositories.ProductRepository;
 
@@ -35,7 +35,6 @@ import lombok.AllArgsConstructor;
 public class CartsController {
     private final ProductRepository productRepository;
     private final CartsRepository cartsRepository;
-    private final CartItemsRepository cartItemsRepository;
 
     private final CartMapper cartMapper;
     private final CartItemMapper cartItemMapper;
@@ -49,7 +48,7 @@ public class CartsController {
     }
 
     @PostMapping("/{cartId}/items")
-    public ResponseEntity<CartItemDto> addProductToCart(@PathVariable UUID cartId, @RequestBody AddCartItemDto request) {
+    public ResponseEntity<CartItemDto> addProductToCart(@PathVariable UUID cartId, @Valid @RequestBody AddCartItemDto request) {
         // Check if cart exists
         var cart = cartsRepository.findById(Objects.requireNonNull(cartId)).orElse(null);
         if(cart == null) {
@@ -60,29 +59,27 @@ public class CartsController {
         // Check if product exists
         var product = productRepository.findById(productId).orElse(null);
         if(product == null) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.badRequest().build(); // this comes from the body not from the request url
         }
 
         // Check if there is existing product in cart item
-        var cartItem = cartItemsRepository.findByProductId(productId);
+        var cartItem = cart.getCartItems().stream().filter(
+            item -> item.getProduct().getId().equals(productId)
+        ).findFirst().orElse(null);
+
         if(cartItem != null) {
-            cartItem.setQuantity(cartItem.getQuantity() + request.getQuantity()); // increase quantity of an existing product in cart item
+            cartItem.setQuantity(cartItem.getQuantity() + 1); // increase quantity of an existing product in cart item
         } else {
-            cartItem = cartItemMapper.toEntity(request);
+            cartItem = new CartItem();
+            cartItem.setQuantity(1);
             cartItem.setCart(cart);
             cartItem.setProduct(product);
         }
 
-        cartItemsRepository.save(cartItem);
+        cart.addItem(cartItem);
+        cartsRepository.save(cart);
 
-        var cartItemDto = cartItemMapper.toDto(cartItem);
-        cartItemDto.setTotalPrice(
-            product.getPrice().multiply(BigDecimal.valueOf(
-                cartItem.getQuantity()
-            ))
-        );
-
-        return new ResponseEntity<>(cartItemDto, HttpStatus.CREATED);
+        return new ResponseEntity<>(cartItemMapper.toDto(cartItem), HttpStatus.CREATED);
     }
 
     @GetMapping("/{cartId}")
@@ -92,23 +89,7 @@ public class CartsController {
             return ResponseEntity.notFound().build();
         }
 
-        var cartDto = cartMapper.toDto(cart);
-
-        cartDto.getItems().forEach(item -> {
-            item.setTotalPrice(
-                item.getProduct().getPrice().multiply(
-                    BigDecimal.valueOf(
-                        item.getQuantity()
-                    )
-                )
-            );
-
-            cartDto.setTotalPrice(
-                cartDto.getTotalPrice().add(item.getTotalPrice())
-            );
-        });
-
-        return ResponseEntity.ok(cartDto);
+        return ResponseEntity.ok(cartMapper.toDto(cart));
     }
 
     @PutMapping("/{cartId}/items/{productId}")
@@ -120,25 +101,17 @@ public class CartsController {
         }
 
         // Check if cart item exists
-        var cartItem = cartItemsRepository.findByProductId(productId);
-        if(cartItem == null) {
-            return ResponseEntity.notFound().build();
-        }
+        var cartItem = cart.getCartItems().stream().filter(
+            item -> item.getProduct().getId().equals(productId)
+        ).findFirst().orElse(null);
 
         cartItem.setQuantity(
             request.getQuantity()
         );
 
-        cartItemsRepository.save(cartItem);
+        cartsRepository.save(cart);
 
         var cartItemDto = cartItemMapper.toDto(cartItem);
-        cartItemDto.setTotalPrice(
-            cartItemDto.getProduct().getPrice().multiply(
-                BigDecimal.valueOf(
-                    cartItemDto.getQuantity()
-                )
-            )
-        );
 
         return ResponseEntity.ok(cartItemDto);
     }
@@ -152,12 +125,15 @@ public class CartsController {
         }
 
         // Check if cart item exists
-        var cartItem = cartItemsRepository.findByProductId(productId);
+        var cartItem = cart.getCartItems().stream().filter(
+            item -> item.getProduct().getId().equals(productId)
+        ).findFirst().orElse(null);
         if(cartItem == null) {
             return ResponseEntity.notFound().build();
         }
 
-        cartItemsRepository.delete(cartItem);
+        cart.removeItem(cartItem);
+        cartsRepository.save(cart);
 
         return ResponseEntity.noContent().build();
     }

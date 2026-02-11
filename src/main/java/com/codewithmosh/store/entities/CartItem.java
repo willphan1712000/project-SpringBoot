@@ -1,5 +1,7 @@
 package com.codewithmosh.store.entities;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -35,4 +37,12 @@ public class CartItem {
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product product;
+
+    public BigDecimal getTotalPrice() {
+        return product.getPrice().multiply(
+            BigDecimal.valueOf(
+                quantity
+            )
+        );
+    }
 }
