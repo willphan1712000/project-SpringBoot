@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -57,11 +58,18 @@ public class AuthController {
         
         return ResponseEntity.ok(new JwtResponse(accessToken));
     }
-    
-    @PostMapping("/validate")
-    public boolean validate(@RequestHeader("Authorization") String authHeader) {
-        var token = authHeader.replace("Bearer ", "");
-        return jwtService.validateToken(token);
+
+    @PostMapping("/refresh")
+    public ResponseEntity<JwtResponse> refresh(@CookieValue( value = "refreshToken" ) String refreshToken) {
+        if(!jwtService.validateToken(refreshToken)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        var userId = jwtService.getSubject(refreshToken);
+        var user = userRepository.findById(Long.parseLong(userId)).orElseThrow();
+        var accessToken = jwtService.generateAccessToken(user);
+
+        return ResponseEntity.ok(new JwtResponse(accessToken));
     }
 
     @GetMapping("/me")
