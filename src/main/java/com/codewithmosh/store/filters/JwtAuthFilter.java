@@ -26,18 +26,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             throws ServletException, IOException {
         var authHeader = request.getHeader("Authorization");
         if(authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response); // will hit protected controller and be denied right away
             return;
         }
 
         var token = authHeader.replace("Bearer ", "");
         if(!jwtService.validateToken(token)) {
-            filterChain.doFilter(request, response);
+            filterChain.doFilter(request, response); // will hit protected controller and be denied right away
             return;
         }
 
         var authentication = new UsernamePasswordAuthenticationToken(
-            jwtService.getEmailFromToken(token),
+            jwtService.getSubject(token),
             null,
             null
         );
@@ -48,7 +48,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         SecurityContextHolder.getContext().setAuthentication(authentication); // hold currently authenticated users
 
-        filterChain.doFilter(request, response);
+        filterChain.doFilter(request, response); // will hit protected controller and be allowed to resources
     }
     
 }

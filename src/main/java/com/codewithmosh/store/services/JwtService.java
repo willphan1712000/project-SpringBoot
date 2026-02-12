@@ -5,6 +5,8 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.codewithmosh.store.dtos.UserDto;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -28,6 +30,21 @@ public class JwtService {
             .compact();
     }
 
+    public String generate(UserDto userDto) {
+        int expiration = 60 * 60 * 24;
+        System.out.println(secret);
+
+        return Jwts
+            .builder()
+            .subject(userDto.getId().toString())
+            .issuedAt(new Date())
+            .expiration(new Date(System.currentTimeMillis() + 1000 * expiration))
+            .claim("name", userDto.getName())
+            .claim("email", userDto.getEmail())
+            .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+            .compact();
+    }
+
     public boolean validateToken(String token) {
         try {
             var claims = getClaims(token);
@@ -47,7 +64,7 @@ public class JwtService {
                 .getPayload();
     }
 
-    public String getEmailFromToken(String token) {
+    public String getSubject(String token) {
         return getClaims(token).getSubject(); // because email is stored in token payload subject
     }
 }
