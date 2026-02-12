@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.codewithmosh.store.config.JwtConfig;
 import com.codewithmosh.store.dtos.JwtResponse;
 import com.codewithmosh.store.dtos.UserDto;
 import com.codewithmosh.store.dtos.auth.SigninDto;
@@ -33,6 +34,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthenticationManager authenticationManager;
+    private final JwtConfig jwtConfig;
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final JwtService jwtService;
@@ -49,7 +51,7 @@ public class AuthController {
         var cookie = new Cookie("refreshToken", refreshToken);
         cookie.setHttpOnly(true);
         cookie.setPath("/auth/refresh");
-        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+        cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration()); // 7 days
         cookie.setSecure(true);
         response.addCookie(cookie);
         

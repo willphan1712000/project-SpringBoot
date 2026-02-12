@@ -2,42 +2,39 @@ package com.codewithmosh.store.services;
 
 import java.util.Date;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import com.codewithmosh.store.config.JwtConfig;
 import com.codewithmosh.store.entities.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import lombok.AllArgsConstructor;
 
 @Service
+@AllArgsConstructor
 public class JwtService {
-    @Value("${spring.jwt.secret}")
-    private String secret;
+    private final JwtConfig config;
 
     public String generate(String email) {
-        int expiration = 60 * 60 * 24;
-        System.out.println(secret);
+        int expiration = config.getAccessTokenExpiration();
 
         return Jwts
             .builder()
             .subject(email)
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + 1000 * expiration))
-            .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+            .signWith(config.getSecretKey())
             .compact();
     }
 
     public String generateAccessToken(User user) {
-        int expiration = 5 * 60 * 24; // 5 minutes
-        return generateToken(user, expiration);
+        return generateToken(user, config.getAccessTokenExpiration());
     }
 
     public String generateRefreshToken(User user) {
-        int expiration = 7 * 24 * 60 * 60; // 7 days
-        return generateToken(user, expiration);
+        return generateToken(user, config.getRefreshTokenExpiration());
     }
 
     private String generateToken(User user, Integer expiration) {
@@ -48,7 +45,7 @@ public class JwtService {
             .expiration(new Date(System.currentTimeMillis() + 1000 * expiration))
             .claim("name", user.getName())
             .claim("email", user.getEmail())
-            .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+            .signWith(config.getSecretKey())
             .compact();
     }
 
@@ -65,7 +62,7 @@ public class JwtService {
     private Claims getClaims(String token) {
         return Jwts
                 .parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .verifyWith(config.getSecretKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
