@@ -25,6 +25,9 @@ import com.codewithmosh.store.services.JwtService;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
+
 @AllArgsConstructor
 @RestController
 @RequestMapping("/auth")
@@ -35,14 +38,22 @@ public class AuthController {
     private final JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<JwtResponse> login(@Valid @RequestBody SigninDto request) {
+    public ResponseEntity<JwtResponse> login(@Valid @RequestBody SigninDto request, HttpServletResponse response) {
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         var user = userRepository.findByEmail(request.getEmail()).orElse(null);
-        var token = jwtService.generate(userMapper.toDto(user));
+        var accessToken = jwtService.generateAccessToken(user);
+
+        var refreshToken = jwtService.generateRefreshToken(user);
+        var cookie = new Cookie("refreshToken", refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/auth/refresh");
+        cookie.setMaxAge(7 * 24 * 60 * 60); // 7 days
+        cookie.setSecure(true);
+        response.addCookie(cookie);
         
-        return ResponseEntity.ok(new JwtResponse(token));
+        return ResponseEntity.ok(new JwtResponse(accessToken));
     }
     
     @PostMapping("/validate")

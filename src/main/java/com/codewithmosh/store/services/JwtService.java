@@ -5,7 +5,7 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import com.codewithmosh.store.dtos.UserDto;
+import com.codewithmosh.store.entities.User;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -30,17 +30,24 @@ public class JwtService {
             .compact();
     }
 
-    public String generate(UserDto userDto) {
-        int expiration = 60 * 60 * 24;
-        System.out.println(secret);
+    public String generateAccessToken(User user) {
+        int expiration = 5 * 60 * 24; // 5 minutes
+        return generateToken(user, expiration);
+    }
 
+    public String generateRefreshToken(User user) {
+        int expiration = 7 * 24 * 60 * 60; // 7 days
+        return generateToken(user, expiration);
+    }
+
+    private String generateToken(User user, Integer expiration) {
         return Jwts
             .builder()
-            .subject(userDto.getId().toString())
+            .subject(user.getId().toString())
             .issuedAt(new Date())
             .expiration(new Date(System.currentTimeMillis() + 1000 * expiration))
-            .claim("name", userDto.getName())
-            .claim("email", userDto.getEmail())
+            .claim("name", user.getName())
+            .claim("email", user.getEmail())
             .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
             .compact();
     }
