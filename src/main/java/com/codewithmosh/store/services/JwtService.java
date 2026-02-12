@@ -45,6 +45,7 @@ public class JwtService {
             .expiration(new Date(System.currentTimeMillis() + 1000 * expiration))
             .claim("name", user.getName())
             .claim("email", user.getEmail())
+            .claim("role", user.getRole())
             .signWith(config.getSecretKey())
             .compact();
     }

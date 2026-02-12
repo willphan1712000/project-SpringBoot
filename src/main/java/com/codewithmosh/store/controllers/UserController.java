@@ -23,6 +23,7 @@ import com.codewithmosh.store.dtos.ChangePasswordUserDto;
 import com.codewithmosh.store.dtos.RegisterUserDto;
 import com.codewithmosh.store.dtos.UpdateUserDto;
 import com.codewithmosh.store.dtos.UserDto;
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
 
@@ -83,6 +84,7 @@ public class UserController {
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setRole(Role.USER);
         userRepository.save(user);
 
         var userDto = userMapper.toDto(user);

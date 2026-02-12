@@ -59,6 +59,10 @@ public class User {
         favoriteProducts.add(product);
     }
 
+    @Column(name = "role")
+    @Enumerated(EnumType.STRING)
+    private Role role;
+
     @Override
     public String toString() {
         return getClass().getSimpleName() + "(" +
