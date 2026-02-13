@@ -30,6 +30,11 @@
         <java.version>23</java.version>
     </properties>
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
 
         <dependency>
             <groupId>org.mapstruct</groupId>
@@ -43,7 +48,6 @@
             <artifactId>mapstruct</artifactId>
             <version>1.6.3</version>
         </dependency>
-
 
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
