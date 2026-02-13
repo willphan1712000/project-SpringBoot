@@ -6,19 +6,19 @@ spring:
         url: jdbc:mysql://localhost:3306/store?createDatabaseIfNotExist=true
         username: root
         password:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+
+    flyway:
+        enabled: true
+        filesystem: classpath:db/migration
+        baseline-on-migrate: true
+
     jpa:
         show-sql: true # show sql in the console when running application
-        properties:
-            jakarta:
-                persistence:
-                    schema-generation:
-                        scripts:
-                            action: none
-                            create-target: src/main/resources/db/migration/V2__add-home-column-in-address-table.sql
-                        create-source: metadata
-                        database:
+        hibernate:
+            ddl-auto: none
 
     jwt:
         secret: ${JWT_SECRET}
-        accessTokenExpiration: 300
+        accessTokenExpiration: 7200
         refreshTokenExpiration: 604800

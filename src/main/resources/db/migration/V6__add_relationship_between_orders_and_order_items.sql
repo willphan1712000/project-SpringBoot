@@ -1,0 +1,1 @@
+ALTER TABLE `order_items` ADD CONSTRAINT `orders_order_items_fk` FOREIGN KEY (`order_id`) REFERENCES `orders`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
