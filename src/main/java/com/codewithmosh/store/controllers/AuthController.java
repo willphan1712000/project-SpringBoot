@@ -48,27 +48,27 @@ public class AuthController {
         var accessToken = jwtService.generateAccessToken(user);
 
         var refreshToken = jwtService.generateRefreshToken(user);
-        var cookie = new Cookie("refreshToken", refreshToken);
+        var cookie = new Cookie("refreshToken", refreshToken.toString());
         cookie.setHttpOnly(true);
         cookie.setPath("/auth/refresh");
         cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration()); // 7 days
         cookie.setSecure(true);
         response.addCookie(cookie);
         
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
     @PostMapping("/refresh")
     public ResponseEntity<JwtResponse> refresh(@CookieValue( value = "refreshToken" ) String refreshToken) {
-        if(!jwtService.validateToken(refreshToken)) {
+        var jwt = jwtService.parse(refreshToken);
+        if(jwt == null || jwt.isExpired()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        var userId = jwtService.getSubjectFrom(refreshToken);
-        var user = userRepository.findById(Long.parseLong(userId)).orElseThrow();
+        var user = userRepository.findById(jwt.getUserId()).orElseThrow();
         var accessToken = jwtService.generateAccessToken(user);
 
-        return ResponseEntity.ok(new JwtResponse(accessToken));
+        return ResponseEntity.ok(new JwtResponse(accessToken.toString()));
     }
 
     @GetMapping("/me")
