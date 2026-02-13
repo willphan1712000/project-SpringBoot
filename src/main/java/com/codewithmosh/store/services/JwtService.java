@@ -69,7 +69,11 @@ public class JwtService {
                 .getPayload();
     }
 
-    public String getSubject(String token) {
+    public String getSubjectFrom(String token) {
         return getClaims(token).getSubject(); // because email is stored in token payload subject
+    }
+
+    public String getRoleFrom(String token) {
+        return getClaims(token).get("role", String.class);
     }
 }

@@ -1,13 +1,16 @@
 package com.codewithmosh.store.filters;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.services.JwtService;
 
 import jakarta.servlet.FilterChain;
@@ -36,10 +39,12 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             return;
         }
 
+        var subject = jwtService.getSubjectFrom(token);
+        var role = jwtService.getRoleFrom(token);
         var authentication = new UsernamePasswordAuthenticationToken(
-            jwtService.getSubject(token),
+            subject,
             null,
-            null
+            List.of(new SimpleGrantedAuthority("ROLE_" + role))
         );
 
         authentication.setDetails(

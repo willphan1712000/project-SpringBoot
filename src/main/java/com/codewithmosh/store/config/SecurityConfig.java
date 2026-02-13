@@ -19,6 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.codewithmosh.store.entities.Role;
 import com.codewithmosh.store.filters.JwtAuthFilter;
 
 import lombok.AllArgsConstructor;
@@ -43,14 +44,18 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll()
+                .requestMatchers("/admin/**").hasRole(Role.ADMIN.toString())
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
-            .exceptionHandling(c -> c.authenticationEntryPoint(
-                new HttpStatusEntryPoint(
-                    HttpStatus.UNAUTHORIZED
-                )
-            ))
+            .exceptionHandling(c -> {
+                c.authenticationEntryPoint(
+                    new HttpStatusEntryPoint(
+                        HttpStatus.UNAUTHORIZED
+                    ) // 401
+                );
+                c.accessDeniedHandler((request, response,accessDeniedException) -> response.setStatus(HttpStatus.FORBIDDEN.value())); // 403
+            })
             .build();
     }
 
@@ -61,8 +66,7 @@ public class SecurityConfig {
 
     @Bean
     AuthenticationProvider authenticationProvider() {
-        var provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
+        var provider = new DaoAuthenticationProvider(userDetailsService);
         provider.setPasswordEncoder(passwordEncoder());
 
         return provider;
