@@ -1,7 +1,7 @@
 package com.codewithmosh.store.services;
 
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 
@@ -53,17 +53,13 @@ public class CheckoutService {
         return order;
     }
 
-    public Stream<FetchOrderDto> getOrders() {
-        // Get user
+    public List<FetchOrderDto> getOrders() {
         var user = authService.getCurrentUser();
-
-        var orders = orderRepository.findByCustomerId(user.getId());
-        
-        return orders.stream().map(orderMapper::toDto);
+        var orders = orderRepository.getAllByCustomer(user);
+        return orders.stream().map(orderMapper::toDto).toList();
     }
 
     public FetchOrderDto getOrder(Long orderId) {
-        // Get user
         var user = authService.getCurrentUser();
 
         var order = orderRepository.findById(orderId).orElse(null);

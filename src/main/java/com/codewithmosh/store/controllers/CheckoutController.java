@@ -1,5 +1,6 @@
 package com.codewithmosh.store.controllers;
 
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithmosh.store.dtos.ErrorDto;
 import com.codewithmosh.store.dtos.order.CheckoutCartDto;
+import com.codewithmosh.store.dtos.order.FetchOrderDto;
 import com.codewithmosh.store.exceptions.CartEmptyException;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.exceptions.OrderNotBelongToUserException;
@@ -34,12 +36,12 @@ public class CheckoutController {
     }
 
     @GetMapping("/orders")
-    public ResponseEntity<?> getOrders() {
+    public ResponseEntity<List<FetchOrderDto>> getOrders() {
         return ResponseEntity.ok(checkoutService.getOrders());
     }
 
     @GetMapping("/orders/{orderId}")
-    public ResponseEntity<?> getOrder(@PathVariable Long orderId) {
+    public ResponseEntity<FetchOrderDto> getOrder(@PathVariable Long orderId) {
         return ResponseEntity.ok(checkoutService.getOrder(orderId));
     }
 
