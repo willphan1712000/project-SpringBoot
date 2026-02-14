@@ -13,7 +13,7 @@ import com.codewithmosh.store.entities.orders.OrderItem;
 public interface CartOrderMapper {
     @Mapping( target = "id", ignore = true )
     @Mapping( target = "order", ignore = true )
-    @Mapping( target = "unitPrice", expression = "java(cartItem.getTotalPrice())")
+    @Mapping( target = "unitPrice", source = "product.price")
     @Mapping( target = "totalPrice", expression = "java(cartItem.getTotalPrice())" )
     OrderItem toOrderItemFrom(CartItem cartItem);
 }

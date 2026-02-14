@@ -21,6 +21,7 @@ import com.codewithmosh.store.dtos.UserDto;
 import com.codewithmosh.store.dtos.auth.SigninDto;
 import com.codewithmosh.store.mappers.UserMapper;
 import com.codewithmosh.store.repositories.UserRepository;
+import com.codewithmosh.store.services.AuthService;
 import com.codewithmosh.store.services.JwtService;
 
 import jakarta.validation.Valid;
@@ -33,6 +34,7 @@ import jakarta.servlet.http.HttpServletResponse;
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+    private final AuthService authService;
     private final AuthenticationManager authenticationManager;
     private final JwtConfig jwtConfig;
     private final UserRepository userRepository;
@@ -73,10 +75,7 @@ public class AuthController {
 
     @GetMapping("/me")
     public ResponseEntity<UserDto> getMe() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
-        var id = (String) authentication.getPrincipal();
-
-        var user = userRepository.findById(Long.parseLong(id)).orElse(null);
+        var user = authService.getCurrentUser();
         if(user == null) {
             return ResponseEntity.notFound().build();
         }

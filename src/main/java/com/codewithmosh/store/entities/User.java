@@ -8,6 +8,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.codewithmosh.store.entities.orders.Order;
+
 @Setter
 @Getter
 @AllArgsConstructor
@@ -63,6 +65,10 @@ public class User {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private Role role;
+
+    @OneToMany(mappedBy = "customer")
+    @Builder.Default
+    private Set<Order> orders = new HashSet<>();
 
     @Override
     public String toString() {

@@ -10,7 +10,7 @@ spring:
 
     flyway:
         enabled: true
-        filesystem: classpath:db/migration
+        locations: classpath:db/migration
         baseline-on-migrate: true
 
     jpa:
@@ -20,5 +20,5 @@ spring:
 
     jwt:
         secret: ${JWT_SECRET}
-        accessTokenExpiration: 7200
+        accessTokenExpiration: 900
         refreshTokenExpiration: 604800

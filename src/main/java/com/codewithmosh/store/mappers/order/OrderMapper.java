@@ -13,6 +13,5 @@ import com.codewithmosh.store.entities.orders.Order;
 public interface OrderMapper {
     @Mapping( target = "items", source = "orderItems")
     @Mapping( target = "totalPrice", expression = "java(order.getTotalPrice())")
-    @Mapping( target = "status", source = "orderStatus")
     FetchOrderDto toDto(Order order);
 }
