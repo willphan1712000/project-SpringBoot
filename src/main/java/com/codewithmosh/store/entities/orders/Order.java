@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.codewithmosh.store.entities.Cart;
 import com.codewithmosh.store.entities.User;
 
 import jakarta.persistence.CascadeType;
@@ -63,5 +64,22 @@ public class Order {
 
     public BigDecimal getTotalPrice() {
         return orderItems.stream().map(OrderItem::getTotalPrice).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    public static Order createOrderFrom(Cart cart, User customer) {
+        var order = new Order();
+        order.setCustomer(customer);
+        order.setStatus(OrderStatus.PENDING);
+        cart.getCartItems().forEach(item -> {
+            var orderItem = new OrderItem(
+                order, item.getProduct(), item.getQuantity()
+            );
+
+            order.addItem(orderItem);
+        });
+
+        order.setTotalPrice(order.getTotalPrice());
+
+        return order;
     }
 }

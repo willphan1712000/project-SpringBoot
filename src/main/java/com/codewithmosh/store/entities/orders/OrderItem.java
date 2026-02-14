@@ -45,4 +45,12 @@ public class OrderItem {
 
     @Column(name = "total_price")
     private BigDecimal totalPrice;
+
+    public OrderItem(Order order, Product product, int quantity) {
+        this.order = order;
+        this.product = product;
+        this.unitPrice = product.getPrice();
+        this.quantity = quantity;
+        this.totalPrice = this.unitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
 }

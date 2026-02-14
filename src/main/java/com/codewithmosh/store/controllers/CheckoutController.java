@@ -13,8 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithmosh.store.dtos.order.CheckoutCartDto;
 import com.codewithmosh.store.entities.orders.Order;
-import com.codewithmosh.store.entities.orders.OrderStatus;
-import com.codewithmosh.store.mappers.order.CartOrderMapper;
 import com.codewithmosh.store.mappers.order.OrderMapper;
 import com.codewithmosh.store.repositories.CartsRepository;
 import com.codewithmosh.store.repositories.OrderRepository;
@@ -33,7 +31,6 @@ public class CheckoutController {
     private final CartService cartService;
 
     private final OrderMapper orderMapper;
-    private final CartOrderMapper cartOrderMapper;
 
     @PostMapping("/checkout")
     public ResponseEntity<?> checkout(@Valid @RequestBody CheckoutCartDto request) {
@@ -45,8 +42,7 @@ public class CheckoutController {
             );
         }
 
-        var cartItems = cart.getCartItems();
-        if(cartItems.isEmpty()) {
+        if(cart.getCartItems().isEmpty()) {
             return ResponseEntity.badRequest().body(
                 Map.of("error", "cart is empty")
             );
@@ -56,11 +52,7 @@ public class CheckoutController {
         var user = authService.getCurrentUser();
 
         // Get all items from the cart and put them into an order
-        var order = new Order();
-        order.setCustomer(user);
-        order.setStatus(OrderStatus.PENDING);
-        cartItems.stream().map(cartOrderMapper::toOrderItemFrom).forEach(order::addItem);
-        order.setTotalPrice(order.getTotalPrice());
+        var order = Order.createOrderFrom(cart, user);
 
         // Save order
         orderRepository.save(order);
