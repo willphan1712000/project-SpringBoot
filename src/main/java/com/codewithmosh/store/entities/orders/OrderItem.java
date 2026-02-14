@@ -2,6 +2,8 @@ package com.codewithmosh.store.entities.orders;
 
 import java.math.BigDecimal;
 
+import com.codewithmosh.store.entities.Product;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,8 +34,9 @@ public class OrderItem {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @Column(name = "product_id")
-    private Long productId;
+    @ManyToOne
+    @JoinColumn(name = "product_id")
+    private Product product;
 
     @Column(name = "unit_price")
     private BigDecimal unitPrice;

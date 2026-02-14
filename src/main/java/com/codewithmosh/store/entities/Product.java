@@ -6,6 +6,8 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.codewithmosh.store.entities.orders.OrderItem;
+
 @Getter
 @Setter
 @Builder
@@ -34,4 +36,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
+
+    @OneToMany(mappedBy = "product")
+    private List<OrderItem> orderItems;
 }

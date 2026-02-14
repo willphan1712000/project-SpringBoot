@@ -14,10 +14,12 @@ public interface ProductMapper {
 
     @Mapping( target = "category", ignore = true)
     @Mapping( target = "cartItems", ignore = true)
+    @Mapping( target = "orderItems", ignore = true)
     Product toEntity(ProductDto request);
     
     @Mapping( target = "category", ignore = true)
     @Mapping( target = "cartItems", ignore = true)
+    @Mapping( target = "orderItems", ignore = true)
     @Mapping( target = "id", ignore = true)
     void update(ProductDto request, @MappingTarget Product product);
 }
