@@ -11,7 +11,7 @@ import lombok.Data;
 @Data
 public class FetchOrderDto {
     private Long id;
-    private String orderStatus;
+    private String status;
     private LocalDateTime createdAt;
     private List<CartItemDto> items;
     private BigDecimal totalPrice;

@@ -3,9 +3,11 @@ package com.codewithmosh.store.controllers;
 import java.util.Map;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -83,5 +85,27 @@ public class CheckoutController {
         }
 
         return ResponseEntity.ok(orders.stream().map(orderMapper::toDto));
+    }
+
+    @GetMapping("/orders/{orderId}")
+    public ResponseEntity<?> getOrder(@PathVariable Long orderId) {
+        // Get user id
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        var id = (Long) authentication.getPrincipal();
+
+        var order = orderRepository.findById(orderId).orElse(null);
+        if(order == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                Map.of("error","order not found")
+            );
+        }
+
+        if(id != order.getCustomerId()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                Map.of("error", "This order does not belong to you")
+            );
+        }
+
+        return ResponseEntity.ok(orderMapper.toDto(order));
     }
 }
