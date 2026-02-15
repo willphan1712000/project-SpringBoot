@@ -10,10 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithmosh.store.dtos.ErrorDto;
 import com.codewithmosh.store.dtos.order.CheckoutCartDto;
-import com.codewithmosh.store.dtos.order.CheckoutReponse;
 import com.codewithmosh.store.exceptions.CartEmptyException;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.services.CheckoutService;
+import com.codewithmosh.store.services.external.PaymentException;
 
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class CheckoutController {
     private final CheckoutService checkoutService;
 
     @PostMapping
-    public ResponseEntity<CheckoutReponse> checkout(@Valid @RequestBody CheckoutCartDto request) throws Exception {
+    public ResponseEntity<?> checkout(@Valid @RequestBody CheckoutCartDto request) {
         return ResponseEntity.ok(checkoutService.checkout(request.getCartId()));
     }
 
@@ -33,6 +33,13 @@ public class CheckoutController {
     public ResponseEntity<ErrorDto> cartEmptyHandler(Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
             new ErrorDto(e.getMessage())
+        );
+    }
+
+    @ExceptionHandler( PaymentException.class )
+    public ResponseEntity<ErrorDto> paymentServiceExceptionHandler() {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+            new ErrorDto("Error creating a checkout session.")
         );
     }
 }

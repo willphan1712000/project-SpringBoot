@@ -19,6 +19,7 @@ public interface UserMapper {
     @Mapping( target = "profile", ignore = true)
     @Mapping( target = "favoriteProducts", ignore = true)
     @Mapping( target = "role", ignore = true)
+    @Mapping( target = "orders", ignore = true)
     User toEntity(RegisterUserDto request);
     
     @Mapping( target = "addresses", ignore = true)
@@ -27,5 +28,6 @@ public interface UserMapper {
     @Mapping( target = "id", ignore =  true)
     @Mapping( target = "password", ignore =  true)
     @Mapping( target = "role", ignore = true)
+    @Mapping( target = "orders", ignore = true)
     void update(UpdateUserDto request, @MappingTarget User user);
 }
