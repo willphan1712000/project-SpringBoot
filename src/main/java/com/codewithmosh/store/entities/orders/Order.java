@@ -83,4 +83,8 @@ public class Order {
 
         return order;
     }
+
+    public boolean has(User user) {
+        return customer.equals(user);
+    }
 }

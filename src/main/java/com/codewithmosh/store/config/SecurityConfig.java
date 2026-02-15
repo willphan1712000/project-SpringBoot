@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/users").permitAll() // register new user
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll() // log in
                 .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll() // refresh token
+                .requestMatchers(HttpMethod.POST, "/checkout/webhook").permitAll()
                 .requestMatchers("/admin/**").hasRole(Role.ADMIN.toString()) // admin access
                 .anyRequest().authenticated()
             )

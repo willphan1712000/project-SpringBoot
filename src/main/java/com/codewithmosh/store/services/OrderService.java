@@ -34,7 +34,7 @@ public class OrderService {
             throw new OrderNotFoundException();
         }
 
-        if(user.getId() != order.getCustomer().getId()) {
+        if(!order.has(user)) {
             throw new OrderNotBelongToUserException();
         }
 

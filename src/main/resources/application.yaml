@@ -25,5 +25,6 @@ spring:
 
 stripe:
     secret: ${STRIPE_SECRET_KEY}
+    webhookSecretKey: ${STRIPE_WEBHOOK_SECRET_KEY}
 
 url: https://google.com

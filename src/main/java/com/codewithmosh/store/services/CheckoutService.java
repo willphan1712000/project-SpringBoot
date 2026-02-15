@@ -11,6 +11,7 @@ import com.codewithmosh.store.exceptions.CartEmptyException;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.repositories.CartsRepository;
 import com.codewithmosh.store.repositories.OrderRepository;
+import com.codewithmosh.store.services.external.PaymentException;
 import com.codewithmosh.store.services.external.PaymentService;
 
 import lombok.RequiredArgsConstructor;
@@ -43,15 +44,20 @@ public class CheckoutService {
         // Get all items from the cart and put them into an order
         var order = Order.createOrderFrom(cart, user);
 
-        // Get checkout session
-        var session = paymentService.createCheckoutSession(order);
-
         // Save order
         orderRepository.save(order);
 
-        // Clear the cart
-        cartService.clearCart(cartId);
-
-        return new CheckoutReponse(order.getId(), session.getCheckoutUrl());
+        try {
+            // Get checkout session
+            var session = paymentService.createCheckoutSession(order);
+    
+            // Clear the cart
+            cartService.clearCart(cartId);
+    
+            return new CheckoutReponse(order.getId(), session.getCheckoutUrl());
+        } catch (PaymentException e) {
+            orderRepository.delete(order);
+            throw e;
+        }
     }
 }
