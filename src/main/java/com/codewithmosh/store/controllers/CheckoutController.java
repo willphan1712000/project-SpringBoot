@@ -1,7 +1,5 @@
 package com.codewithmosh.store.controllers;
 
-import java.util.Map;
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.codewithmosh.store.dtos.ErrorDto;
 import com.codewithmosh.store.dtos.order.CheckoutCartDto;
+import com.codewithmosh.store.dtos.order.CheckoutReponse;
 import com.codewithmosh.store.exceptions.CartEmptyException;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
 import com.codewithmosh.store.services.CheckoutService;
@@ -26,9 +25,8 @@ public class CheckoutController {
     private final CheckoutService checkoutService;
 
     @PostMapping
-    public ResponseEntity<?> checkout(@Valid @RequestBody CheckoutCartDto request) {
-        var order = checkoutService.checkout(request.getCartId());
-        return ResponseEntity.ok(Map.of("orderId", order.getId()));
+    public ResponseEntity<CheckoutReponse> checkout(@Valid @RequestBody CheckoutCartDto request) throws Exception {
+        return ResponseEntity.ok(checkoutService.checkout(request.getCartId()));
     }
 
     @ExceptionHandler({ CartEmptyException.class, CartNotFoundException.class })

@@ -25,3 +25,5 @@ spring:
 
 stripe:
     secret: ${STRIPE_SECRET_KEY}
+
+url: http://localhost:8080
