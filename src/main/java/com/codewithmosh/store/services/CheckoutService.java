@@ -5,7 +5,8 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.codewithmosh.store.dtos.order.CheckoutReponse;
+import com.codewithmosh.store.dtos.checkout.CheckoutReponse;
+import com.codewithmosh.store.dtos.checkout.WebhookRequest;
 import com.codewithmosh.store.entities.orders.Order;
 import com.codewithmosh.store.exceptions.CartEmptyException;
 import com.codewithmosh.store.exceptions.CartNotFoundException;
@@ -59,5 +60,15 @@ public class CheckoutService {
             orderRepository.delete(order);
             throw e;
         }
+    }
+
+    public void parseWebhook(WebhookRequest request) {
+        paymentService.parseWebhook(request).ifPresent(
+            paymentResult -> {
+                var order = orderRepository.findById(paymentResult.getOrderId()).orElseThrow();
+                order.setStatus(paymentResult.getStatus());
+                orderRepository.save(order);
+            }
+        );
     }
 }

@@ -1,3 +1,10 @@
 package com.codewithmosh.store.services.external;
 
-public class PaymentException extends RuntimeException {}
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor
+public class PaymentException extends RuntimeException {
+    public PaymentException(String message) {
+        super(message);
+    }
+}

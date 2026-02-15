@@ -1,4 +1,4 @@
-package com.codewithmosh.store.dtos.order;
+package com.codewithmosh.store.dtos.checkout;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
