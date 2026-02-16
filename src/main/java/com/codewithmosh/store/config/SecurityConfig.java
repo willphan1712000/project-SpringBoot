@@ -1,5 +1,7 @@
 package com.codewithmosh.store.config;
 
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -30,6 +32,7 @@ import lombok.AllArgsConstructor;
 public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final JwtAuthFilter jwtAuthFilter;
+    private final List<SecurityRules> featureSecurityRules;
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,20 +43,17 @@ public class SecurityConfig {
             .sessionManagement(c -> c.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(
-                c -> c.requestMatchers("/carts/**").permitAll() // public shpping cart
-                .requestMatchers("/swagger-ui/**").permitAll()
-                .requestMatchers("/swagger-ui.html").permitAll()
-                .requestMatchers("/v3/api-docs/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/users").permitAll() // register new user
-                .requestMatchers(HttpMethod.POST, "/auth/login").permitAll() // log in
-                .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll() // refresh token
-                .requestMatchers(HttpMethod.POST, "/checkout/webhook").permitAll()
-                .requestMatchers("/admin/**").hasRole(Role.ADMIN.toString()) // admin access
-                .requestMatchers(HttpMethod.GET, "/products/**").permitAll()
-                .requestMatchers(HttpMethod.POST,"/products/**").hasRole(Role.ADMIN.toString()) // admin access
-                .requestMatchers(HttpMethod.PUT,"/products/**").hasRole(Role.ADMIN.toString()) // admin access
-                .requestMatchers(HttpMethod.DELETE,"/products/**").hasRole(Role.ADMIN.toString()) // admin access
-                .anyRequest().authenticated()
+                c -> {
+                    featureSecurityRules.forEach(rule -> rule.configure(c));
+                    
+                    c.requestMatchers("/carts/**").permitAll() // public shpping cart
+                    .requestMatchers(HttpMethod.POST, "/users").permitAll() // register new user
+                    .requestMatchers(HttpMethod.POST, "/auth/login").permitAll() // log in
+                    .requestMatchers(HttpMethod.POST, "/auth/refresh").permitAll() // refresh token
+                    .requestMatchers(HttpMethod.POST, "/checkout/webhook").permitAll()
+                    .requestMatchers("/admin/**").hasRole(Role.ADMIN.toString()) // admin access
+                    .anyRequest().authenticated();
+                }
             )
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
             .exceptionHandling(c -> {
