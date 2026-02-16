@@ -1,0 +1,7 @@
+spring:
+    datasource:
+        url: ${DATASOURCE_URL}
+        username: ${DATASOURCE_USERNAME}
+        password: ${DATASOURCE_PASSWORD}
+        driver-class-name: com.mysql.cj.jdbc.Driver
+url: https://google.com

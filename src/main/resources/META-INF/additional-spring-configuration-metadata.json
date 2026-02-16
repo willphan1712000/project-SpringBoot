@@ -1,9 +1,37 @@
-{"properties": [{
-  "name": "url",
-  "type": "java.lang.String",
-  "description": "A description for 'url'"
-}, {
-  "name": "stripe.secret",
-  "type": "java.lang.String",
-  "description": "A description for 'stripe.secret'"
-}]}
+{"properties": [
+  {
+    "name": "url",
+    "type": "java.lang.String",
+    "description": "A description for 'url'"
+  },
+  {
+    "name": "stripe.secret",
+    "type": "java.lang.String",
+    "description": "A description for 'stripe.secret'"
+  },
+  {
+    "name": "stripe.webhookSecretKey",
+    "type": "java.lang.String",
+    "description": "A description for 'stripe.webhookSecretKey'"
+  },
+  {
+    "name": "spring.jwt.secret",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jwt.secret'"
+  },
+  {
+    "name": "url",
+    "type": "java.lang.String",
+    "description": "A description for 'url'"
+  },
+  {
+    "name": "spring.jwt.accessTokenExpiration",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jwt.accessTokenExpiration'"
+  },
+  {
+    "name": "spring.jwt.refreshTokenExpiration",
+    "type": "java.lang.String",
+    "description": "A description for 'spring.jwt.refreshTokenExpiration'"
+  }
+]}
