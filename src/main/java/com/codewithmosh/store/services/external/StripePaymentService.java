@@ -40,9 +40,9 @@ public class StripePaymentService implements PaymentService {
             // Create a checkout session
             var builder = SessionCreateParams.builder()
                 .setMode(SessionCreateParams.Mode.PAYMENT)
-                .setSuccessUrl(url + "/success.html?orderId" + order.getId())
+                .setSuccessUrl(url + "/success.html?orderId=" + order.getId())
                 .setCancelUrl(url + "/cancel.html")
-                .putMetadata("order_id", order.getId().toString());
+                .setPaymentIntentData(createPaymentIntent(order));
     
             order.getOrderItems().forEach(item -> {
                 var lineItem = createLineItem(item);
@@ -56,6 +56,11 @@ public class StripePaymentService implements PaymentService {
             System.out.println(ex); // simulate logging service
             throw new PaymentException();
         }
+    }
+
+    private SessionCreateParams.PaymentIntentData createPaymentIntent(Order order) {
+        return SessionCreateParams.PaymentIntentData.builder()
+            .putMetadata("order_id", order.getId().toString()).build();
     }
 
     private SessionCreateParams.LineItem.PriceData.ProductData createProductData(OrderItem item) {
